@@ -301,7 +301,7 @@ func (ipvsc *ipvsControllerController) Stop() error {
 }
 
 // newIPVSController creates a new controller from the given config.
-func newIPVSController(kubeClient *kubernetes.Clientset, namespace string, useUnicast bool, configMapName string, vrid int, proxyMode bool) *ipvsControllerController {
+func newIPVSController(kubeClient *kubernetes.Clientset, namespace string, useUnicast bool, configMapName string, vrid int, proxyMode bool, vrrpVersion int) *ipvsControllerController {
 	ipvsc := ipvsControllerController{
 		client:            kubeClient,
 		reloadRateLimiter: flowcontrol.NewTokenBucketRateLimiter(reloadQPS, int(reloadQPS)),
@@ -322,6 +322,7 @@ func newIPVSController(kubeClient *kubernetes.Clientset, namespace string, useUn
 
 	selector := parseNodeSelector(pod.Spec.NodeSelector)
 	clusterNodes := getClusterNodesIP(kubeClient, selector)
+	glog.Infof("clusterNodes: %+v", clusterNodes)
 
 	nodeInfo, err := getNetworkInfo(podInfo.NodeIP)
 	if err != nil {
@@ -329,6 +330,7 @@ func newIPVSController(kubeClient *kubernetes.Clientset, namespace string, useUn
 	}
 
 	neighbors := getNodeNeighbors(nodeInfo, clusterNodes)
+	glog.Infof("node neighbors: %+v", neighbors)
 
 	execer := exec.New()
 	dbus := utildbus.New()
@@ -345,6 +347,7 @@ func newIPVSController(kubeClient *kubernetes.Clientset, namespace string, useUn
 		ipt:        iptInterface,
 		vrid:       vrid,
 		proxyMode:  proxyMode,
+		vrrpVersion:  vrrpVersion,
 	}
 
 	ipvsc.syncQueue = NewTaskQueue(ipvsc.sync)

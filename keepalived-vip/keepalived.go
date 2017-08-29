@@ -56,6 +56,7 @@ type keepalived struct {
 	ipt            iptables.Interface
 	vrid           int
 	proxyMode      bool
+	vrrpVersion    int
 }
 
 // WriteCfg creates a new keepalived configuration file.
@@ -81,6 +82,7 @@ func (k *keepalived) WriteCfg(svcs []vip) error {
 	conf["useUnicast"] = k.useUnicast
 	conf["vrid"] = k.vrid
 	conf["proxyMode"] = k.proxyMode
+	conf["vrrpVersion"] = k.vrrpVersion
 
 	if glog.V(2) {
 		b, _ := json.Marshal(conf)
@@ -131,6 +133,8 @@ func (k *keepalived) Start() {
 
 	k.cmd = exec.Command("keepalived",
 		"--dont-fork",
+		"--address-monitoring",
+		"--log-detail",
 		"--log-console",
 		"--release-vips",
 		"--pid", "/keepalived.pid")

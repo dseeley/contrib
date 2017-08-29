@@ -1,8 +1,10 @@
 all: push
 
 # 0.0 shouldn't clobber any release builds, current "latest" is 0.11
-TAG = 0.11
-PREFIX = gcr.io/google_containers/kube-keepalived-vip
+#TAG = 0.11
+#PREFIX = gcr.io/google_containers/kube-keepalived-vip
+TAG = dev
+PREFIX = skyvtp/kube-keepalived-vip
 BUILD_IMAGE = build-keepalived
 TEMP_GOPATH = ${GOPATH}:${GOPATH}/src/k8s.io/kubernetes/staging
 
@@ -20,8 +22,8 @@ keepalived:
 	docker rm -f $(BUILD_IMAGE)
 
 push: container
-	gcloud docker -- push $(PREFIX):$(TAG)
-
+#	gcloud docker -- push $(PREFIX):$(TAG)
+	docker push $(PREFIX):$(TAG)
 clean:
 	rm -f kube-keepalived-vip
 
